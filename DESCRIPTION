@@ -19,3 +19,5 @@ Imports:
     dplyr,
     ggplot2,
     latex2exp
+URL: https://github.com/Accelerytics/mlkit
+BugReports: https://github.com/Accelerytics/mlkit/issues
