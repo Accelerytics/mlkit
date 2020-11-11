@@ -80,7 +80,7 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
   for (i in 1:n.combs) {
 
     # Apply cross validation and if verbose, update progress bar
-    for (fold in 1:n.folds) { if (verbose) pb$tick()$print()
+    for (fold in 1:n.folds) { if (verbose) pb$tick()
 
       # Compute individual metric on fold
       metrics[fold] = tryCatch(
