@@ -9,7 +9,7 @@
 #
 # Output:
 #   Summary statistic for given linear regression model.
-rss = function(beta, x, y) sum((y - x %*% beta) ^ 2)
+rss = function(beta, x, y) {sum((y - x %*% beta) ^ 2)}
 r2 = function(beta, x, y) 1 - rss(beta, x, y) / sum((y - mean(y)) ^ 2)
 adj.r2 = function(beta, x, y) {
   N = nrow(x); return(1 - (1 - r2(beta, x, y)) * (N - 1) / (N - sum(beta != 0)))
@@ -40,7 +40,7 @@ create.y = function(y, intercept, standardize) {
   return(y)
 }
 initialize.beta = function(beta.init, x) {
-  if(is.null(beta.init)) return(2 * runif(ncol(x)) - 1)
+  if(is.null(beta.init)) return(2 * stats::runif(ncol(x)) - 1)
   return(beta.init)
 }
 
@@ -68,15 +68,17 @@ elastic.net.loss = function(beta, x, y, intercept, lambda.l1, lambda.l2)
 #
 # Inputs:
 #   beta:         Vector of parameter estimates.
-#   x:            Table containing unscaled numerical explanatory variables.
-#   y:            Column containing an unscaled numerical dependent variable.
+#   x.mean:       Vector of column means of the explanatory variables.
+#   x.sd:         Vector of column standard deviations of the explanatory
+#                 variables.
+#   y.mean:       Mean of dependent variable.
+#   y.sd:         Standard deviation of dependent variable.
 #
 # Output:
 #   Descaled linear regression estimator.
-descale.beta = function(beta, x, y) {
-  beta = sd(y) * beta / apply(x, 2, sd)
-  beta = c(mean(y) - sum(colMeans(x) * beta), beta)
-  names(beta) = c('(Intercept)', colnames(x))
+descale.beta = function(beta, x.mean, x.sd, y.mean, y.sd) {
+  beta = y.sd * beta / x.sd
+  beta = c(y.mean - sum(x.mean * beta), beta)
   return(beta)
 }
 
@@ -89,4 +91,4 @@ progress.str = function(line.list) {
 
 progress.line = function(line) paste0(
   format(paste0(line[1], ':'), width=25), format(line[2], width=25,
-                                                 justify='right', nsmall=ifelse(is.integer(line[2]), 0, 10)),'\n')
+  justify='right', nsmall=ifelse(is.integer(line[2]), 0, 10)),'\n')

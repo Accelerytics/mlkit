@@ -16,6 +16,11 @@ knitr::opts_chunk$set(
 # mlkit
 
 <!-- badges: start -->
+`r badger::badge_devel('mlkit', 'blue')`
+`r badger::badge_travis('mlkit')`
+`r badger::badge_coveralls('mlkit')`
+`r badger::badge_code_size('mlkit')`
+`r badger::badge_last_commit('mlkit')`
 <!-- badges: end -->
 
 `mlkit` is a collection of implementations of machine learning algorithms and utilities for data science projects. This packages has initially been developed

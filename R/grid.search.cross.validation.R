@@ -19,8 +19,9 @@
 #' respective values to consider
 #' @param n.folds optional number of folds (K) in cross-validation. Default is
 #' 5.
-#' @param ind.metric metric function with arguments \code{coef.train},
-#' \code{x.train} and \code{y.train} that returns a performance metric for the
+#' @param ind.metric metric function taking in a numerical vector of
+#' coefficients, a numerical matrix of explanatory variables and a numerical
+#' vector of dependent variables that returns a performance metric for the
 #' individual folds.
 #' @param comb.metric optional function used to combine individual fold
 #' metrics. Default is \code{\link[base]{mean}}.
@@ -31,7 +32,7 @@
 #' @param force optional boolean indicating whether or not to allow for errors
 #' due to singularity when applying the estimator. If \code{TRUE}, the
 #' individual metric of folds with hyperparameter combinations for which the
-#' estimator is not able to estimate coeffients due to singularity, are set to
+#' estimator is not able to estimate coefficients due to singularity, are set to
 #' \code{Inf} and hence the errors are ignored. Default is \code{FALSE}.
 #' @param verbose optional boolean indicating whether to show a progress bar.
 #' Default is \code{FALSE}.
@@ -42,6 +43,7 @@
 #' scales for the axes in the heatmaps. Default is \code{NULL}.
 #' @param coef.lims optimal limits of the coefficients plot. Default is
 #' \code{NULL}.
+#' @param seed optimal seed to specify. Default is \code{NULL}.
 #' @param ... additional arguments to be passed to the \code{estimator}
 #' function.
 #'
@@ -55,10 +57,11 @@
 #'
 grid.search.cross.validation = function(formula, data, estimator, params.list,
   n.folds=5, ind.metric, comb.metric=mean, fold.id=NULL, force=F, verbose=F,
-  plot=F, heat.scale=NULL, coef.lims=NULL, ...) {
+  plot=F, heat.scale=NULL, coef.lims=NULL, seed=NULL, ...) {
 
   # Define constants
-  y = data.matrix(y); x = data.matrix(x); N = nrow(x); opt.metric = Inf
+  y = data.matrix(data[, all.vars(formula)[1]]); set.seed(seed)
+  x = stats::model.matrix(formula, data); N = nrow(x); opt.metric = Inf
 
   # Specify fold ids if not given and initialize metrics and ids vector
   if(is.null(fold.id)) fold.id = ((1:N) %% n.folds + 1)[sample(N, N)]
@@ -81,9 +84,9 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
 
       # Compute individual metric on fold
       metrics[fold] = tryCatch(
-        ind.metric(do.call(estimator, c(list(x=x[!test.ids[fold, ], ],
-          y=y[!test.ids[fold, ]]), as.list(grid[i, ]), list(...)))$beta,
-          x[test.ids[fold, ], ], y[test.ids[fold, ]]),
+        ind.metric(do.call(estimator, c(list(formula=formula,
+          data=data[!test.ids[fold, ], ]), as.list(grid[i, ]),
+          list(...)))$coefficients, x[test.ids[fold, ], ], y[test.ids[fold, ]]),
         error = function(e) {
           warning(paste('Failed for', paste(names(params.list), '=', grid[i, ],
             collapse=', ')))
@@ -101,24 +104,27 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
   opt.id = which.min(metric)
   opt.metric = metric[opt.id]; opt.params = grid[opt.id, ]
 
-  # Plot heatmaps if required
-  combs = combn(names(params.list), 2); grid$metric = metric
-  if (heatmap) for (i in 1:ncol(combs)) {
-    col.x = combs[1, i]; col.y = combs[2, i]
-    p = ggplot2::ggplot(data = grid, ggplot2::aes_string(x=col.x, y=col.y)) +
-      ggplot2::geom_tile(aes(color=metric, fill=metric)) + ggplot2::ylab(
-      latex2exp::TeX(paste0('$\\', col.y, '$'))) + ggplot2::xlab(
-      latex2exp::TeX(paste0('$\\', col.x, '$')))
-    if (!is.null(heat.scale))
-      p = p + ggplot2::scale_y_continuous(trans=heat.scale[col.y]) +
-      ggplot2::scale_x_continuous(trans=heat.scale[col.x])
-    print(p)
-  }
-
-  # Estimate best beta and if required, plot outcomes
+  # Estimate best beta
   opt.beta = do.call(estimator, c(list(x=x, y=y), as.list(opt.params),
     list(...)))$beta
-  if (plot.coef) {
+
+  # Plot heatmaps and coefficients if required
+  if (plot) {
+    # Plot heatmaps
+    combs = utils::combn(names(params.list), 2); grid$metric = metric
+    for (i in 1:ncol(combs)) {
+      col.x = combs[1, i]; col.y = combs[2, i]
+      p = ggplot2::ggplot(data = grid, ggplot2::aes_string(x=col.x, y=col.y)) +
+        ggplot2::geom_tile(ggplot2::aes(color=metric, fill=metric)) +
+        ggplot2::ylab(latex2exp::TeX(paste0('$\\', col.y, '$'))) +
+        ggplot2::xlab(latex2exp::TeX(paste0('$\\', col.x, '$')))
+      if (!is.null(heat.scale))
+        p = p + ggplot2::scale_y_continuous(trans=heat.scale[col.y]) +
+        ggplot2::scale_x_continuous(trans=heat.scale[col.x])
+      print(p)
+    }
+
+    # Plots beta estimates
     p = ggplot2::ggplot(data.frame(y=colnames(x), beta=as.vector(opt.beta)),
       ggplot2::aes(beta, y)) + ggplot2::geom_col() +
       ggplot2::ylab('Expl. variable') +
@@ -130,9 +136,8 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
   # Reformat optimal hyperparameters
   if (length(params.list) > 1) opt.params = c(opt.params)
 
-  return(list(
-    'coefficients' = opt.beta,
-    'metric' = opt.metric,
-    'params' = opt.params
-  ))
+  # Return gscv object
+  res = list('coefficients'=opt.beta, 'metric'=opt.metric, 'params'=opt.params)
+  class(res) = 'gscv'
+  return(res)
 }

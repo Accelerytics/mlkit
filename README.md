@@ -5,6 +5,11 @@
 
 <!-- badges: start -->
 
+[![](https://img.shields.io/badge/devel%20version-0.0.0.1-blue.svg)](https://github.com/mlkit)
+[![](https://travis-ci.org/mlkit.svg?branch=master)](https://travis-ci.org/mlkit)
+[![](https://coveralls.io/repos/github/mlkit/badge.svg?branch=master)](https://coveralls.io/github/mlkit)
+[![](https://img.shields.io/github/languages/code-size/mlkit.svg)](https://github.com/mlkit)
+[![](https://img.shields.io/github/last-commit/mlkit.svg)](https://github.com/mlkit/commits/master)
 <!-- badges: end -->
 
 `mlkit` is a collection of implementations of machine learning

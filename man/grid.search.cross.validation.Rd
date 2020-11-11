@@ -18,6 +18,7 @@ grid.search.cross.validation(
   plot = F,
   heat.scale = NULL,
   coef.lims = NULL,
+  seed = NULL,
   ...
 )
 }
@@ -42,8 +43,9 @@ respective values to consider}
 \item{n.folds}{optional number of folds (K) in cross-validation. Default is
 5.}
 
-\item{ind.metric}{metric function with arguments \code{coef.train},
-\code{x.train} and \code{y.train} that returns a performance metric for the
+\item{ind.metric}{metric function taking in a numerical vector of
+coefficients, a numerical matrix of explanatory variables and a numerical
+vector of dependent variables that returns a performance metric for the
 individual folds.}
 
 \item{comb.metric}{optional function used to combine individual fold
@@ -57,7 +59,7 @@ If provided, \code{n.folds} is ignored. Default is \code{NULL}.}
 \item{force}{optional boolean indicating whether or not to allow for errors
 due to singularity when applying the estimator. If \code{TRUE}, the
 individual metric of folds with hyperparameter combinations for which the
-estimator is not able to estimate coeffients due to singularity, are set to
+estimator is not able to estimate coefficients due to singularity, are set to
 \code{Inf} and hence the errors are ignored. Default is \code{FALSE}.}
 
 \item{verbose}{optional boolean indicating whether to show a progress bar.
@@ -72,6 +74,8 @@ scales for the axes in the heatmaps. Default is \code{NULL}.}
 
 \item{coef.lims}{optimal limits of the coefficients plot. Default is
 \code{NULL}.}
+
+\item{seed}{optimal seed to specify. Default is \code{NULL}.}
 
 \item{...}{additional arguments to be passed to the \code{estimator}
 function.}

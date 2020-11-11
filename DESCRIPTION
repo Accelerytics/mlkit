@@ -18,6 +18,8 @@ Imports:
     stats,
     dplyr,
     ggplot2,
-    latex2exp
+    latex2exp,
+    utils,
+    badger
 URL: https://github.com/Accelerytics/mlkit
 BugReports: https://github.com/Accelerytics/mlkit/issues
