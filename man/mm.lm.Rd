@@ -11,7 +11,7 @@ mm.lm(
   standardize = F,
   beta.init = NULL,
   beta.tol = 0,
-  loss.tol = 1e-06,
+  loss.tol = 0.000001,
   seed = NULL,
   verbose = 0
 )
@@ -36,7 +36,7 @@ ignored. Default is \code{FALSE}.
 \code{TRUE}, \code{standardize} is ignored. Default is \code{FALSE}.}
 
 \item{beta.init}{optional initial beta parameters to use in the MM
-algorithm. Optional is \code{NULL}.}
+algorithm. Default is \code{NULL}.}
 
 \item{beta.tol}{optional absolute tolerance for rounding down parameter
 standardized estimates. If the absolute value of a parameter estimate in the

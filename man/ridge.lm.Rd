@@ -4,7 +4,7 @@
 \alias{ridge.lm}
 \title{Fitting Linear Models with Ridge Penalty}
 \usage{
-ridge.lm(formula, data, lambda, intercept = F, standardize = T, beta.tol = 0)
+ridge.lm(formula, data, lambda, intercept = F, standardize = F, beta.tol = 0)
 }
 \arguments{
 \item{formula}{an object of class \code{\link[stats]{formula}}: a symbolic
