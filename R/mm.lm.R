@@ -92,7 +92,7 @@ mm.lm = function(formula, data, intercept=F, standardize=F, beta.init=NULL,
   b.new[abs(b.new) < beta.tol] = 0
 
   # Descale beta if necessary
-  if (intercept | !standardize) beta = c(0, b.new)
+  if (intercept | standardize) beta = c(0, b.new)
   else beta = descale.beta(b.new, x.mean, x.sd, y.mean, y.sd)
 
   # Return mlfit object

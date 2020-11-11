@@ -105,14 +105,16 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
   opt.metric = metric[opt.id]; opt.params = grid[opt.id, ]
 
   # Estimate best beta
-  opt.beta = do.call(estimator, c(list(x=x, y=y), as.list(opt.params),
-    list(...)))$beta
+  opt.beta = do.call(estimator, c(list(formula=formula, data=data),
+    as.list(opt.params), list(...)))$coefficients
 
   # Plot heatmaps and coefficients if required
   if (plot) {
-    # Plot heatmaps
-    combs = utils::combn(names(params.list), 2); grid$metric = metric
+    grid$metric = metric
+
+    # Plot heatmaps if more than 1 hyperparameter
     if (length(params.list) > 1) {
+      combs = utils::combn(names(params.list), 2);
       for (i in 1:ncol(combs)) {
         col.x = combs[1, i]; col.y = combs[2, i]
         p = ggplot2::ggplot(data = grid,
@@ -125,9 +127,8 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
           ggplot2::scale_x_continuous(trans=heat.scale[col.x])
       }
     } else {
-      col.x = combs[1]; p = ggplot2::gplot(data = grid,
+      col.x = names(params.list)[1]; p = ggplot2::ggplot(data = grid,
         ggplot2::aes_string(x=col.x, y=metric)) + ggplot2::geom_line() +
-        ggplot2::ylab(latex2exp::TeX(paste0('$\\', col.y, '$'))) +
         ggplot2::xlab(latex2exp::TeX(paste0('$\\', col.x, '$')))
       if (!is.null(heat.scale))
         p = p + ggplot2::scale_x_continuous(trans=heat.scale[col.x])
@@ -135,8 +136,8 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
     print(p)
 
     # Plots beta estimates
-    p = ggplot2::ggplot(data.frame(y=colnames(x), beta=as.vector(opt.beta)),
-      ggplot2::aes(beta, y)) + ggplot2::geom_col() +
+    p = ggplot2::ggplot(data.frame(y=c('(Intercept)', colnames(x)),
+      beta=as.vector(opt.beta)), ggplot2::aes(beta, y)) + ggplot2::geom_col() +
       ggplot2::ylab('Expl. variable') +
       ggplot2::xlab(latex2exp::TeX('$\\beta$'))
     if (!is.null(coef.lims)) p = p + ggplot2::xlim(coef.lims)
