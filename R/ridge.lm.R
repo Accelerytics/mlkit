@@ -34,7 +34,7 @@
 #' coefficients.}
 #' @export
 #'
-ridge.lm = function(formula, data, lambda, intercept=F, standardize=T,
+ridge.lm = function(formula, data, lambda, intercept=F, standardize=F,
   beta.tol=0) {
 
   # Extract dependent variable and explanatory variables
