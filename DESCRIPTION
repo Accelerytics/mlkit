@@ -16,10 +16,10 @@ RoxygenNote: 7.1.1
 Imports: 
     base,
     stats,
-    dplyr,
     ggplot2,
     latex2exp,
     utils,
-    badger
+    badger,
+    progress
 URL: https://github.com/Accelerytics/mlkit
 BugReports: https://github.com/Accelerytics/mlkit/issues

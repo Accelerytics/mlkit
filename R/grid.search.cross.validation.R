@@ -74,7 +74,7 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
   n.combs = nrow(grid); metric = rep(NULL, n.combs)
 
   # If verbose, initialize progress bar
-  if (verbose) pb = dplyr::progress_estimated(n.combs * n.folds)
+  if (verbose) pb = progress::progress_bar$new(total = n.combs * n.folds)
 
   # Apply grid search
   for (i in 1:n.combs) {
