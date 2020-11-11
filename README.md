@@ -36,7 +36,6 @@ mathijs@accelerytics.com](mailto:mathijs@accelerytics.com).
 
 ## Copyright and License
 
-Copyright 2020 Accelerytics. Content released under the
-[MIT](https://github.com/BlackrockDigital/startbootstrap-agency/blob/gh-pages/LICENSE)
-license, which means you can use this content for any purpose, even for
-commercial projects.
+Copyright 2020 Accelerytics. Content released under the [MIT
+license](LICENSE), which means you can use this content for any purpose,
+even for commercial projects.
