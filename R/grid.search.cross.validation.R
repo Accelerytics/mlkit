@@ -112,17 +112,27 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
   if (plot) {
     # Plot heatmaps
     combs = utils::combn(names(params.list), 2); grid$metric = metric
-    for (i in 1:ncol(combs)) {
-      col.x = combs[1, i]; col.y = combs[2, i]
-      p = ggplot2::ggplot(data = grid, ggplot2::aes_string(x=col.x, y=col.y)) +
-        ggplot2::geom_tile(ggplot2::aes(color=metric, fill=metric)) +
+    if (length(params.list) > 1) {
+      for (i in 1:ncol(combs)) {
+        col.x = combs[1, i]; col.y = combs[2, i]
+        p = ggplot2::ggplot(data = grid,
+          ggplot2::aes_string(x=col.x, y=col.y)) +
+          ggplot2::geom_tile(ggplot2::aes(color=metric, fill=metric)) +
+          ggplot2::ylab(latex2exp::TeX(paste0('$\\', col.y, '$'))) +
+          ggplot2::xlab(latex2exp::TeX(paste0('$\\', col.x, '$')))
+        if (!is.null(heat.scale))
+          p = p + ggplot2::scale_y_continuous(trans=heat.scale[col.y]) +
+          ggplot2::scale_x_continuous(trans=heat.scale[col.x])
+      }
+    } else {
+      col.x = combs[1]; p = ggplot2::gplot(data = grid,
+        ggplot2::aes_string(x=col.x, y=metric)) + ggplot2::geom_line() +
         ggplot2::ylab(latex2exp::TeX(paste0('$\\', col.y, '$'))) +
         ggplot2::xlab(latex2exp::TeX(paste0('$\\', col.x, '$')))
       if (!is.null(heat.scale))
-        p = p + ggplot2::scale_y_continuous(trans=heat.scale[col.y]) +
-        ggplot2::scale_x_continuous(trans=heat.scale[col.x])
-      print(p)
+        p = p + ggplot2::scale_x_continuous(trans=heat.scale[col.x])
     }
+    print(p)
 
     # Plots beta estimates
     p = ggplot2::ggplot(data.frame(y=colnames(x), beta=as.vector(opt.beta)),
