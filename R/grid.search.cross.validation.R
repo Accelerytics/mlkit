@@ -129,6 +129,7 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
     } else {
       col.x = names(params.list)[1]; p = ggplot2::ggplot(data = grid,
         ggplot2::aes_string(x=col.x, y=metric)) + ggplot2::geom_line() +
+        ggplot2::ylab('metric') +
         ggplot2::xlab(latex2exp::TeX(paste0('$\\', col.x, '$')))
       if (!is.null(heat.scale))
         p = p + ggplot2::scale_x_continuous(trans=heat.scale[col.x])
