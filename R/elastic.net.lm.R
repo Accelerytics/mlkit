@@ -20,7 +20,7 @@
 #' ignored. Default is \code{FALSE}.
 #' \code{TRUE}, \code{standardize} is ignored. Default is \code{FALSE}.
 #' @param beta.init optional initial beta parameters to use in the MM
-#' algorithm. Optional is \code{NULL}.
+#' algorithm. Default is \code{NULL}.
 #' @param beta.tol optional absolute tolerance for rounding down parameter
 #' standardized estimates. If the absolute value of a parameter estimate in the
 #' standardized model is smaller than \code{beta.tol}, it is rounded down to
