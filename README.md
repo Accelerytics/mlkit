@@ -5,7 +5,7 @@
 
 <!-- badges: start -->
 
-[![](https://img.shields.io/badge/devel%20version-0.0.0.1-blue.svg)](https://github.com/mlkit)
+[![](https://img.shields.io/badge/devel%20version-0.0.0.1-orange.svg)](https://github.com/mlkit)
 [![](https://img.shields.io/github/languages/code-size/Accelerytics/mlkit.svg)](https://github.com/Accelerytics/mlkit)
 [![](https://img.shields.io/github/last-commit/Accelerytics/mlkit.svg)](https://github.com/Accelerytics/mlkit/commits/master)
 <!-- badges: end -->

@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 # mlkit
 
 <!-- badges: start -->
-`r badger::badge_devel('mlkit', 'blue')`
+`r badger::badge_devel('mlkit', 'orange')`
 `r badger::badge_code_size('Accelerytics/mlkit')`
 `r badger::badge_last_commit('Accelerytics/mlkit')`
 <!-- badges: end -->
