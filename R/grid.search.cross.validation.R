@@ -112,14 +112,13 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
   if (plot) {
     grid$metric = metric
 
-    # Plot heatmaps if more than 1 hyperparameter
+    # Contour plots if more than 1 hyperparameter
     if (length(params.list) > 1) {
       combs = utils::combn(names(params.list), 2);
       for (i in 1:ncol(combs)) {
         col.x = combs[1, i]; col.y = combs[2, i]
-        p = ggplot2::ggplot(data = grid,
-          ggplot2::aes_string(x=col.x, y=col.y)) +
-          ggplot2::geom_tile(ggplot2::aes(color=metric, fill=metric)) +
+        p = ggplot2::ggplot(data = grid, ggplot2::aes_string(x=col.x, y=col.y,
+          z='metric')) + ggplot2::geom_contour_filled() +
           ggplot2::ylab(latex2exp::TeX(paste0('$\\', col.y, '$'))) +
           ggplot2::xlab(latex2exp::TeX(paste0('$\\', col.x, '$')))
         if (!is.null(heat.scale))
@@ -145,11 +144,9 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
     print(p)
   }
 
-  # Reformat optimal hyperparameters
-  if (length(params.list) > 1) opt.params = c(opt.params)
-
   # Return gscv object
-  res = list('coefficients'=opt.beta, 'metric'=opt.metric, 'params'=opt.params)
+  res = list('coefficients'=opt.beta, 'metric'=opt.metric,
+    'params'=c(opt.params))
   class(res) = 'gscv'
   return(res)
 }
