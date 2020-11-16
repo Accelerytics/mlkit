@@ -13,8 +13,7 @@ dual.ridge.lm(
   kernel = "lin",
   const = 0,
   degree = NULL,
-  scale = NULL,
-  ...
+  scale = NULL
 )
 }
 \arguments{

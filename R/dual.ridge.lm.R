@@ -39,7 +39,7 @@
 #' @export
 #'
 dual.ridge.lm = function(formula, data, lambda, intercept=F, standardize=F,
-  kernel='lin', const=0, degree=NULL, scale=NULL, ...) {
+  kernel='lin', const=0, degree=NULL, scale=NULL) {
 
   # Extract dependent variable and explanatory variables
   x = stats::model.matrix(formula, data)
@@ -142,7 +142,7 @@ dual.ridge.lm = function(formula, data, lambda, intercept=F, standardize=F,
 
   # Construct output
   coefficients = c('w0'=w0, q.til)
-  y.hat = coeffients[1] + coefficients[-1]
+  y.hat = coefficients[1] + coefficients[-1]
   rss = sum((y - y.hat) ^ 2)
   r2 = 1 - rss / sum((y - mean(y)) ^ 2)
 
