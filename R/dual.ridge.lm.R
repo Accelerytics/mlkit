@@ -80,7 +80,7 @@ dual.ridge.lm = function(formula, data, lambda, intercept=F, standardize=F,
   } else if (kernel == 'cir') {
     if (is.null(scale)) stop('Circular kernel requires scale argument.')
     std.dist = as.matrix(stats::dist(x) / scale)
-    k = (std.dist < 1) * 2 / pi * (arccos(-std.dist) - std.dist *
+    k = (std.dist < 1) * 2 / pi * (acos(-std.dist) - std.dist *
                                      sqrt(1 - std.dist ^ 2))
   } else if (kernel == 'exp') {
     if (is.null(scale)) stop('Exponential kernel requires scale argument.')
@@ -102,7 +102,7 @@ dual.ridge.lm = function(formula, data, lambda, intercept=F, standardize=F,
     k = exp(as.matrix(stats::dist(x, method='manhattan') / scale))
   } else if (kernel == 'log') {
     if (is.null(degree)) stop('Logarithmic kernel requires degree argument.')
-    k = -log(as.matrix(dist(x) ^ degree) + 1)
+    k = -log(as.matrix(stats::dist(x) ^ degree) + 1)
   } else if (kernel == 'mqk') {
     if (is.null(const)) stop('Multiquadratic kernel requires const argument.')
     k = sqrt(as.matrix(stats::dist(x) ^ 2 + const ^ 2))
