@@ -68,7 +68,7 @@ initialize.beta = function(beta.init, x) {
   if(is.null(beta.init)) return(2 * stats::runif(ncol(x)) - 1)
   return(beta.init)
 }
-create.k = function(x, kernel, const, degree, scale, n) {
+create.k = function(x, kernel, const, degree, scale, n=NULL) {
   kernel = match.arg(kernel, KERNELS, several.ok = F)
   if (is.null(n)) n = nrow(x)
   if (kernel == 'cau') {
