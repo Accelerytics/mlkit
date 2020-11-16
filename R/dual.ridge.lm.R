@@ -136,9 +136,11 @@ dual.ridge.lm = function(formula, data, lambda, intercept=F, standardize=F,
   j = diag(n) - 1 / n
   k.til = j %*% k %*% j
   eig = eigen(k.til, symmetric = TRUE); quad.eig.vals = eig$value ^ 2
-  inv.mat = quad.eig.vals / (quad.eig.vals + lambda)
+  inv.mat = diag(quad.eig.vals / (quad.eig.vals + lambda))
   w0 = mean(y)
-  q.til = eig$vectors %*% inv.mat %*% tcrossprod(eig$vectors, j %*% y)
+  print(dim(inv.mat))
+  print(eig$vectors)
+  q.til = eig$vectors %*% inv.mat %*% t(eig$vectors) %*% j %*% y
 
   # Construct output
   coefficients = c('w0'=w0, q.til)
@@ -147,8 +149,7 @@ dual.ridge.lm = function(formula, data, lambda, intercept=F, standardize=F,
   r2 = 1 - rss / sum((y - mean(y)) ^ 2)
 
   # Return mlfit object
-  res = list('coefficients'=coefficients, 'alpha'=0, 'lambda'=lambda,
-    'loss'=rss + lambda * crossprod(q.til, solve(k)) %*% q.til, 'r2'=r2)
+  res = list('coefficients'=coefficients, 'alpha'=0, 'lambda'=lambda, 'r2'=r2)
   class(res) = 'mlfit'
   return(res)
 }
