@@ -64,8 +64,8 @@ updates.}
 }
 \value{
 \code{elastic.net.lm} returns an object of \code{\link{class}}
-\code{mlfit}. An object of class \code{mlfit} is a list containing at
-least the following components:
+\code{mlkit.fit}. An object of class \code{mlkit.fit} is a list containing
+at least the following components:
 \item{coefficients}{a named vector of optimal coefficients.}
 \item{loss}{residual sum of squares plus elastic net loss for optimal
 coefficients.}

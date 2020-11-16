@@ -20,9 +20,9 @@
 #' @param n.folds optional number of folds (K) in cross-validation. Default is
 #' 5.
 #' @param ind.metric metric function taking in a numerical vector of
-#' coefficients, a numerical matrix of explanatory variables and a numerical
-#' vector of dependent variables that returns a performance metric for the
-#' individual folds.
+#' predictions for the dependent variable together with a numerical vector of
+#' actual outcomes of the dependent variable that returns a performance metric
+#' for the individual folds.
 #' @param comb.metric optional function used to combine individual fold
 #' metrics. Default is \code{\link[base]{mean}}.
 #' @param fold.id optional vector containing numerical fold identifiers for
@@ -39,8 +39,8 @@
 #' @param plot optional boolean indicating whether to generate heatmaps of
 #' performance on the grid and displaying the estimated coefficients. Default
 #' is \code{FALSE}.
-#' @param heat.scale optional vector containing the hyperparameters and their
-#' scales for the axes in the heatmaps. Default is \code{NULL}.
+#' @param contour.scale optional vector containing the hyperparameters and
+#' their scales for the axes in the contour plots. Default is \code{NULL}.
 #' @param coef.lims optimal limits of the coefficients plot. Default is
 #' \code{NULL}.
 #' @param seed optimal seed to specify. Default is \code{NULL}.
@@ -57,7 +57,7 @@
 #'
 grid.search.cross.validation = function(formula, data, estimator, params.list,
   n.folds=5, ind.metric, comb.metric=mean, fold.id=NULL, force=F, verbose=F,
-  plot=F, heat.scale=NULL, coef.lims=NULL, seed=NULL, ...) {
+  plot=F, contour.scale=NULL, coef.lims=NULL, seed=NULL, ...) {
 
   # Define constants
   y = data.matrix(data[, all.vars(formula)[1]]); set.seed(seed)
@@ -84,9 +84,9 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
 
       # Compute individual metric on fold
       metrics[fold] = tryCatch(
-        ind.metric(do.call(estimator, c(list(formula=formula,
-          data=data[!test.ids[fold, ], ]), as.list(grid[i, ]),
-          list(...)))$coefficients, x[test.ids[fold, ], ], y[test.ids[fold, ]]),
+        ind.metric(stats::predict(do.call(estimator, c(list(formula=formula,
+          data=data[!test.ids[fold, ], ]), as.list(grid[i, ]), list(...))),
+          x[test.ids[fold, ], ]), y[test.ids[fold, ]]),
         error = function(e) {
           warning(paste('Failed for', paste(names(params.list), '=', grid[i, ],
             collapse=', ')))
@@ -121,17 +121,17 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
           z='metric')) + ggplot2::geom_contour_filled() +
           ggplot2::ylab(latex2exp::TeX(paste0('$\\', col.y, '$'))) +
           ggplot2::xlab(latex2exp::TeX(paste0('$\\', col.x, '$')))
-        if (!is.null(heat.scale))
-          p = p + ggplot2::scale_y_continuous(trans=heat.scale[col.y]) +
-          ggplot2::scale_x_continuous(trans=heat.scale[col.x])
+        if (!is.null(contour.scale))
+          p = p + ggplot2::scale_y_continuous(trans=contour.scale[col.y]) +
+          ggplot2::scale_x_continuous(trans=contour.scale[col.x])
       }
     } else {
       col.x = names(params.list)[1]; p = ggplot2::ggplot(data = grid,
         ggplot2::aes_string(x=col.x, y=metric)) + ggplot2::geom_line() +
         ggplot2::ylab('metric') +
         ggplot2::xlab(latex2exp::TeX(paste0('$\\', col.x, '$')))
-      if (!is.null(heat.scale))
-        p = p + ggplot2::scale_x_continuous(trans=heat.scale[col.x])
+      if (!is.null(contour.scale))
+        p = p + ggplot2::scale_x_continuous(trans=contour.scale[col.x])
     }
     print(p)
 

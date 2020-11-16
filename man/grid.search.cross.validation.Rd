@@ -16,7 +16,7 @@ grid.search.cross.validation(
   force = F,
   verbose = F,
   plot = F,
-  heat.scale = NULL,
+  contour.scale = NULL,
   coef.lims = NULL,
   seed = NULL,
   ...
@@ -44,9 +44,9 @@ respective values to consider}
 5.}
 
 \item{ind.metric}{metric function taking in a numerical vector of
-coefficients, a numerical matrix of explanatory variables and a numerical
-vector of dependent variables that returns a performance metric for the
-individual folds.}
+predictions for the dependent variable together with a numerical vector of
+actual outcomes of the dependent variable that returns a performance metric
+for the individual folds.}
 
 \item{comb.metric}{optional function used to combine individual fold
 metrics. Default is \code{\link[base]{mean}}.}
@@ -69,8 +69,8 @@ Default is \code{FALSE}.}
 performance on the grid and displaying the estimated coefficients. Default
 is \code{FALSE}.}
 
-\item{heat.scale}{optional vector containing the hyperparameters and their
-scales for the axes in the heatmaps. Default is \code{NULL}.}
+\item{contour.scale}{optional vector containing the hyperparameters and
+their scales for the axes in the contour plots. Default is \code{NULL}.}
 
 \item{coef.lims}{optimal limits of the coefficients plot. Default is
 \code{NULL}.}

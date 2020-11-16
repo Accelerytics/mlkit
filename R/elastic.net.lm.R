@@ -35,14 +35,15 @@
 #' updates.
 #'
 #' @return \code{elastic.net.lm} returns an object of \code{\link{class}}
-#' \code{mlfit}. An object of class \code{mlfit} is a list containing at
-#' least the following components:
+#' \code{mlkit.fit}. An object of class \code{mlkit.fit} is a list containing
+#' at least the following components:
 #' \item{coefficients}{a named vector of optimal coefficients.}
 #' \item{loss}{residual sum of squares plus elastic net loss for optimal
 #' coefficients.}
 #' \item{r2}{coefficient of determination for optimal coefficients.}
 #' \item{adj.r2}{adjusted coefficient of determination for optimal
 #' coefficients.}
+#'
 #' @export
 #'
 elastic.net.lm = function(formula, data, lambda, alpha, intercept=F,
@@ -116,6 +117,6 @@ elastic.net.lm = function(formula, data, lambda, alpha, intercept=F,
   # Return mlfit object
   res = list('coefficients'=beta, 'alpha'=alpha, 'lambda'=lambda,
     'loss'=loss(b.new), 'R2'=r2(b.new, x, y), 'adj.R2'=adj.r2(b.new, x, y))
-  class(res) = 'mlfit'
+  class(res) = 'mlkit.fit'
   return(res)
 }

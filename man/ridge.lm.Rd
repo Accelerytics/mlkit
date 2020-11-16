@@ -34,11 +34,10 @@ zero. Default is \code{0}, that is, no rounding.}
 }
 \value{
 \code{ridge.lm} returns an object of \code{\link{class}}
-\code{mlfit}. An object of class \code{mlfit} is a list containing at
-least the following components:
+\code{mlkit.fit}. An object of class \code{mlkit.fit} is a list containing
+at least the following components:
 \item{coefficients}{a named vector of optimal coefficients.}
-\item{loss}{residual sum of squares plus ridge loss for optimal
-coefficients.}
+\item{loss}{residual sum of squares for optimal coefficients.}
 \item{r2}{coefficient of determination for optimal coefficients.}
 \item{adj.r2}{adjusted coefficient of determination for optimal
 coefficients.}

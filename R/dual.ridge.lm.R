@@ -29,13 +29,19 @@
 #' @param scale optional scale parameter in the kernel transformation. Default
 #' is \code{NULL}.
 #'
-#' @return \code{ridge.lm} returns an object of \code{\link{class}}
-#' \code{mlfit}. An object of class \code{mlfit} is a list containing at
-#' least the following components:
+#' @return \code{dual.ridge.lm} returns an object of \code{\link{class}}
+#' \code{mlkit.dual.ridge.fit}. An object of class \code{mlkit.dual.ridge.fit}
+#' is a list containing at least the following components:
 #' \item{coefficients}{a named vector of optimal coefficients.}
-#' \item{loss}{residual sum of squares plus ridge loss for optimal
-#' coefficients.}
+#' \item{alpha}{L1-weight hyperparameter in elastic net penalty term.}
+#' \item{lambda}{penalty term scaling hyperparameter.}
 #' \item{r2}{coefficient of determination for optimal coefficients.}
+#' \item{ker.mat}{kernel matrix used in estimation.}
+#' \item{kernel}{kernel transformation.}
+#' \item{const}{constant parameter in the kernel transformation.}
+#' \item{degree}{degree parameter in the kernel transformation.}
+#' \item{scale}{scale parameter in the kernel transformation.}
+#'
 #' @export
 #'
 dual.ridge.lm = function(formula, data, lambda, intercept=F, standardize=F,
@@ -55,81 +61,8 @@ dual.ridge.lm = function(formula, data, lambda, intercept=F, standardize=F,
   x = create.x(x, intercept, standardize)
   y = create.y(y, intercept, standardize)
 
-  KERNELS = c(
-    'cir', # Circular kernel (scale)
-    'cau', # Cauchy kernel (scale)
-    'exp', # Exponential kernel (scale)
-    'gau', # Gaussian kernel (scale)
-    'pol', # Polynomial kernel (const, scale, degree)
-    'imq', # Inverse multiquadratic kernel (const)
-    'lap', # Laplacian kernel (scale)
-    'lin', # Linear kernel (const)
-    'log', # Logarithmic kernel (degree)
-    'mqk', # Multiquadric kernel (const)
-    'pow', # Power kernel (degree)
-    'rbf', # Radial basis kernel (scale)
-    'rqk', # Rational quadratic kernel
-    'sig', # Hyperbolic tangent or sigmoid kernel (const, scale)
-    'sph' # Spherical kernel (scale)
-  )
-
-  kernel = match.arg(kernel, KERNELS, several.ok = F)
-  if (kernel == 'cau') {
-    if (is.null(scale)) stop('Cauchy kernel requires scale argument.')
-    k = 1 + as.matrix(stats::dist(x) ^ 2 / scale ^ 2)
-  } else if (kernel == 'cir') {
-    if (is.null(scale)) stop('Circular kernel requires scale argument.')
-    std.dist = as.matrix(stats::dist(x) / scale)
-    k = (std.dist < 1) * 2 / pi * (acos(-std.dist) - std.dist *
-                                     sqrt(1 - std.dist ^ 2))
-  } else if (kernel == 'exp') {
-    if (is.null(scale)) stop('Exponential kernel requires scale argument.')
-    k = exp(-as.matrix(stats::dist(x) / (nrow(x) * scale ^ 2)))
-  } else if (kernel == 'gau') {
-    if (is.null(scale)) stop('Gaussian kernel requires scale argument.')
-    k = exp(-as.matrix(stats::dist(x) ^ 2 / (scale * nrow(x))))
-  } else if (kernel == 'pol') {
-    if (is.null(const)) stop('Polynomial kernel requires const argument.')
-    if (is.null(degree)) stop('Polynomial kernel requires degree argument.')
-    if (is.null(scale)) stop('Polynomial kernel requires scale argument.')
-    k = (const + scale * x %*% t(x)) ^ degree
-  } else if (kernel == 'imq') {
-    if (is.null(const))
-      stop('Inverse multiquadratic kernel requires const argument.')
-    k = sqrt(as.matrix(stats::dist(x) ^ 2 + const ^ 2)) ^ -1
-  } else if (kernel == 'lap') {
-    if (is.null(scale)) stop('Laplacian kernel requires scale argument.')
-    k = exp(as.matrix(stats::dist(x, method='manhattan') / scale))
-  } else if (kernel == 'log') {
-    if (is.null(degree)) stop('Logarithmic kernel requires degree argument.')
-    k = -log(as.matrix(stats::dist(x) ^ degree) + 1)
-  } else if (kernel == 'mqk') {
-    if (is.null(const)) stop('Multiquadratic kernel requires const argument.')
-    k = sqrt(as.matrix(stats::dist(x) ^ 2 + const ^ 2))
-  } else if (kernel == 'pow') {
-    if (is.null(degree)) stop('Power kernel requires degree argument.')
-    k = (x %*% t(x)) ^ degree
-  } else if (kernel == 'rbf') {
-    if (is.null(scale))
-      stop('Radial basis function kernel requires scale argument.')
-    k = exp(-scale * as.matrix(stats::dist(x) ^ 2))
-  } else if (kernel == 'rqk') {
-    if (is.null(const))
-      stop('Rational quadratic kernel requires const argument.')
-    quad.dist = as.matrix(stats::dist(x) ^ 2)
-    k = 1 - quad.dist / (quad.dist + const)
-  } else if (kernel == 'sig') {
-    if (is.null(const)) stop('Sigmoid kernel requires const argument.')
-    if (is.null(scale)) stop('Sigmoid kernel requires scale argument.')
-    k = tanh(const + scale * x %*% t(x))
-  } else if (kernel == 'sph') {
-    if (is.null(scale)) stop('Spherical kernel requires scale argument.')
-    std.dist = as.matrix(stats::dist(x) / scale)
-    k = (std.dist < 1) * (1 - 3 / 2 * std.dist + std.dist ^ 3 / 2)
-  } else { # Default: linear kernel
-    if (is.null(const)) stop('Linear kernel requires const argument.')
-    k = x %*% t(x) + const
-  }
+  # Generate transformed explanatory variables matrix k
+  k = create.k(x, kernel, const, degree, scale)
 
   # Estimate model
   n = nrow(x)
@@ -138,9 +71,7 @@ dual.ridge.lm = function(formula, data, lambda, intercept=F, standardize=F,
   eig = eigen(k.til, symmetric = TRUE); quad.eig.vals = eig$value ^ 2
   inv.mat = diag(quad.eig.vals / (quad.eig.vals + lambda))
   w0 = mean(y)
-  print(dim(inv.mat))
-  print(eig$vectors)
-  q.til = eig$vectors %*% inv.mat %*% t(eig$vectors) %*% j %*% y
+  q.til = as.vector(eig$vectors %*% inv.mat %*% t(eig$vectors) %*% j %*% y)
 
   # Construct output
   coefficients = c('w0'=w0, q.til)
@@ -149,7 +80,8 @@ dual.ridge.lm = function(formula, data, lambda, intercept=F, standardize=F,
   r2 = 1 - rss / sum((y - mean(y)) ^ 2)
 
   # Return mlfit object
-  res = list('coefficients'=coefficients, 'alpha'=0, 'lambda'=lambda, 'r2'=r2)
-  class(res) = 'mlfit'
+  res = list('coefficients'=coefficients, 'alpha'=0, 'lambda'=lambda, 'r2'=r2,
+    'ker.mat'=k, 'kernel'=kernel, 'const'=const, 'degree'=degree, 'scale'=scale)
+  class(res) = 'mlkit.dual.ridge.fit'
   return(res)
 }

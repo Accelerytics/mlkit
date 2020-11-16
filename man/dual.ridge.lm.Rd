@@ -52,13 +52,18 @@ is \code{NULL}.}
 is \code{NULL}.}
 }
 \value{
-\code{ridge.lm} returns an object of \code{\link{class}}
-\code{mlfit}. An object of class \code{mlfit} is a list containing at
-least the following components:
+\code{dual.ridge.lm} returns an object of \code{\link{class}}
+\code{mlkit.dual.ridge.fit}. An object of class \code{mlkit.dual.ridge.fit}
+is a list containing at least the following components:
 \item{coefficients}{a named vector of optimal coefficients.}
-\item{loss}{residual sum of squares plus ridge loss for optimal
-coefficients.}
+\item{alpha}{L1-weight hyperparameter in elastic net penalty term.}
+\item{lambda}{penalty term scaling hyperparameter.}
 \item{r2}{coefficient of determination for optimal coefficients.}
+\item{ker.mat}{kernel matrix used in estimation.}
+\item{kernel}{kernel transformation.}
+\item{const}{constant parameter in the kernel transformation.}
+\item{degree}{degree parameter in the kernel transformation.}
+\item{scale}{scale parameter in the kernel transformation.}
 }
 \description{
 Implementation of the dual analytical solution for a linear
