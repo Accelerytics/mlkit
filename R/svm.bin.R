@@ -39,7 +39,7 @@ svm.bin = function(formula, data, lambda, loss='qua', huber.k=NULL,
   # Hinge Huber loss with k equal to 1 equivalent to easier absolute hinge loss
   if (!is.null(huber.k))
     if ((loss == 'hub') & (huber.k == 1)) return(svm.bin(formula, data, lambda,
-      'abs', kernel, const, degree, scale, loss.tol, verbose))
+      'abs', loss.tol, v.init, seed, verbose))
 
   # Extract dependent variable and explanatory variables
   y = as.vector((data[, all.vars(formula)[1]]))
