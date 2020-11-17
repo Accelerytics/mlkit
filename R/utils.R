@@ -66,12 +66,16 @@ initialize.beta = function(beta.init, x) {
   return(beta.init)
 }
 create.k = function(x, kernel, const, degree, scale, n=NULL, y=NULL) {
-  if (is.null(y)) y = x
-  eucl.dist = function(x, y)
-    outer(rowSums(x ^ 2), rep(1, nrow(x))) + outer(rep(1, nrow(y)),
-      rowSums(y ^ 2)) - 2 * y %*% t(x)
+
+  # Define custom function for Euclidean distance between columns of matrices
+  eucl.dist = function(x, y) outer(rowSums(y ^ 2), rep(1, nrow(x))) +
+    outer(rep(1, nrow(y)), rowSums(x ^ 2)) - 2 * y %*% t(x)
+
+  # Correct and check input
+  if (is.null(y)) y = x; if (is.null(n)) n = nrow(x)
   kernel = match.arg(kernel, KERNELS, several.ok = F)
-  if (is.null(n)) n = nrow(x)
+
+  # Return kernel transformation
   if (kernel == 'cau') {
     if (is.null(scale)) stop('Cauchy kernel requires scale argument.')
     return(1 + as.matrix(eucl.dist(x, y) ^ 2 / scale ^ 2))

@@ -73,7 +73,7 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
   for (fold in 1:n.folds) test.ids[fold, ] = (fold.id == fold)
 
   # Create grid for cross validation search
-  grid = expand.grid(params.list)
+  grid = expand.grid(params.list, stringsAsFactors=F)
   n.combs = nrow(grid); metric = rep(NULL, n.combs)
 
   # If verbose, initialize progress bar
@@ -93,7 +93,7 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
         error = function(e) {
           warning(paste('Failed for', paste(names(params.list), '=', grid[i, ],
             collapse=', ')))
-          if (force & grepl('.*singular.*', e$message)) return(Inf)
+          if (force & grepl('.*(singular)|(infinite).*', e$message)) return(Inf)
           stop(e)
         }
       )
