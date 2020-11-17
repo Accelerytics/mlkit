@@ -11,7 +11,7 @@ mm.lm(
   standardize = F,
   beta.init = NULL,
   beta.tol = 0,
-  loss.tol = 1e-06,
+  loss.tol = 0.000001,
   seed = NULL,
   verbose = 0
 )
@@ -54,7 +54,7 @@ updates.}
 }
 \value{
 \code{mm.lm} returns an object of \code{\link{class}}
-\code{mlkit.lm.fit}. An object of class \code{mlkit.fit} is a list
+\code{mlkit.lm.fit}. An object of class \code{mlkit.lm.fit} is a list
 containing at least the following components:
 \item{coefficients}{a named vector of optimal coefficients.}
 \item{loss}{residual sum of squares for optimal coefficients.}

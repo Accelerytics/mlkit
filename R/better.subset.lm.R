@@ -32,7 +32,7 @@
 #' updates.
 #'
 #' @return \code{better.subset.lm} returns an object of \code{\link{class}}
-#' \code{mlkit.lm.fit}. An object of class \code{mlkit.fit} is a list
+#' \code{mlkit.lm.fit}. An object of class \code{mlkit.lm.fit} is a list
 #' containing at least the following components:
 #' \item{coefficients}{a named vector of optimal coefficients.}
 #' \item{loss}{residual sum of squares for optimal coefficients.}

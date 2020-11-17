@@ -154,6 +154,27 @@ elastic.net.loss = function(beta, x, y, intercept, lambda.l1, lambda.l2)
   lambda.l2 * sum(beta[(1 + intercept):ncol(x)] ^ 2) / 2
 
 ################################################################################
+# Helper function for hinge loss function.
+#
+# Inputs:
+#   x:            Table containing numerical explanatory variables.
+#   loss:         Character hinge loss type.
+#   huber.k:      Huber hinge loss hyperparameter k.
+#
+# Output:
+#   Loss of the given linear model with an elastic net penalty.
+hinge.loss = function(x, loss, huber.k) {
+  if (loss == 'abs') return(function(x) return(x))
+  if (loss == 'qua') return(function(x) return(x ^ 2))
+  if (loss == 'hub') return(function(x) {
+    if (abs(x) < huber.k + 1)
+      return(x ^ 2 / (2 * (huber.k + 1)))
+    return(x - (huber.k + 1) / 2)
+  })
+  stop('Hinge loss type not recognized.')
+}
+
+################################################################################
 # Helper function for descaling a linear regression estimator estimated on
 # scaled data.
 #
@@ -183,3 +204,42 @@ progress.str = function(line.list) {
 progress.line = function(line) paste0(
   format(paste0(line[1], ':'), width=25), format(line[2], width=25,
   justify='right', nsmall=ifelse(is.integer(line[2]), 0, 10)),'\n')
+
+################################################################################
+# Helper functions for Support Vector Machines.
+
+svm.upt.a = function(q, ind, loss, huber.k) {
+  if (loss == 'abs')
+    return(diag(as.vector(0.25 / ifelse(ind, abs(1 - q), abs(q + 1)))))
+  if (loss == 'qua')
+    return(diag(length(ind)))
+  if (loss == 'hub') {
+    if (huber.k < -1) stop("Invalid k, must be larger or equal to -1.")
+    return(diag(rep(0.5 / (huber.k + 1), length(ind))))
+  }
+  stop('Unknown hinge loss function.')
+}
+svm.upt.b = function(a, q, ind, loss, huber.k) {
+  if (loss == 'abs')
+    return(-diag(a) * (-1) ^ ind + 0.25)
+
+  if (loss == 'qua') {
+    q[!ind & (q > -1)] = -1
+    q[ind & (q <= 1)] = 1
+    return(q)
+  }
+
+  if (loss == 'hub') {
+    if (huber.k < -1) stop("Invalid k, must be larger or equal to -1.")
+    b = diag(a)
+    b[!ind & q <= -1] = b[!ind & q <= -1] * q[!ind & q <= -1]
+    b[!ind & q > -1 & q < huber.k] = -b[!ind & q > -1 & q < huber.k]
+    b[!ind & q >= huber.k] = b[!ind & q >= huber.k] *
+      q[!ind & q >= huber.k] - 0.5
+    b[ind & q <= -huber.k] = 0.5 + b[ind & q <= -huber.k] *
+      q[ind & q <= -huber.k]
+    b[ind & q >= 1] = b[ind & q >= 1] * q[ind & q >= 1]
+    return(b)
+  }
+  stop('Unknown hinge loss function.')
+}
