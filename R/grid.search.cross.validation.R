@@ -43,6 +43,9 @@
 #' their scales for the axes in the contour plots. Default is \code{NULL}.
 #' @param coef.lims optimal limits of the coefficients plot. Default is
 #' \code{NULL}.
+#' @param coef.names optional names of coefficients, used in estimates barplot.
+#' Default is \code{NULL} in which case the column names of the explanatory
+#' variables are used.
 #' @param seed optimal seed to specify. Default is \code{NULL}.
 #' @param ... additional arguments to be passed to the \code{estimator}
 #' function.
@@ -57,7 +60,7 @@
 #'
 grid.search.cross.validation = function(formula, data, estimator, params.list,
   n.folds=5, ind.metric, comb.metric=mean, fold.id=NULL, force=F, verbose=F,
-  plot=F, contour.scale=NULL, coef.lims=NULL, seed=NULL, ...) {
+  plot=F, contour.scale=NULL, coef.lims=NULL, coef.names=NULL, seed=NULL, ...) {
 
   # Define constants
   y = data.matrix(data[, all.vars(formula)[1]]); set.seed(seed)
@@ -86,7 +89,7 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
       metrics[fold] = tryCatch(
         ind.metric(stats::predict(do.call(estimator, c(list(formula=formula,
           data=data[!test.ids[fold, ], ]), as.list(grid[i, ]), list(...))),
-          x[test.ids[fold, ], ]), y[test.ids[fold, ]]),
+          newdata=x[test.ids[fold, ], ]), y[test.ids[fold, ]]),
         error = function(e) {
           warning(paste('Failed for', paste(names(params.list), '=', grid[i, ],
             collapse=', ')))
@@ -136,7 +139,8 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
     print(p)
 
     # Plots beta estimates
-    p = ggplot2::ggplot(data.frame(y=c('(Intercept)', colnames(x)),
+    if (is.null(coef.names)) coef.names = c('(Intercept)', colnames(x))
+    p = ggplot2::ggplot(data.frame(y=coef.names,
       beta=as.vector(opt.beta)), ggplot2::aes(beta, y)) + ggplot2::geom_col() +
       ggplot2::ylab('Expl. variable') +
       ggplot2::xlab(latex2exp::TeX('$\\beta$'))

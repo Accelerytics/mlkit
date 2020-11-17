@@ -38,13 +38,10 @@ adj.r2 = function(beta, x, y) {
 #   model.
 
 KERNELS = c(
-  'cir', # Circular kernel (scale)
   'cau', # Cauchy kernel (scale)
-  'exp', # Exponential kernel (scale)
-  'gau', # Gaussian kernel (scale)
+  'cir', # Circular kernel (scale)
   'pol', # Polynomial kernel (const, scale, degree)
   'imq', # Inverse multiquadratic kernel (const)
-  'lap', # Laplacian kernel (scale)
   'lin', # Linear kernel (const)
   'log', # Logarithmic kernel (degree)
   'mqk', # Multiquadric kernel (const)
@@ -68,78 +65,70 @@ initialize.beta = function(beta.init, x) {
   if(is.null(beta.init)) return(2 * stats::runif(ncol(x)) - 1)
   return(beta.init)
 }
-create.k = function(x, kernel, const, degree, scale, n=NULL) {
+create.k = function(x, kernel, const, degree, scale, n=NULL, y=NULL) {
+  if (is.null(y)) y = x
+  eucl.dist = function(x, y)
+    outer(rowSums(x ^ 2), rep(1, nrow(x))) + outer(rep(1, nrow(y)),
+      rowSums(y ^ 2)) - 2 * y %*% t(x)
   kernel = match.arg(kernel, KERNELS, several.ok = F)
   if (is.null(n)) n = nrow(x)
   if (kernel == 'cau') {
     if (is.null(scale)) stop('Cauchy kernel requires scale argument.')
-    return(1 + as.matrix(stats::dist(x) ^ 2 / scale ^ 2))
+    return(1 + as.matrix(eucl.dist(x, y) ^ 2 / scale ^ 2))
   }
   if (kernel == 'cir') {
     if (is.null(scale)) stop('Circular kernel requires scale argument.')
-    std.dist = as.matrix(stats::dist(x) / scale)
+    std.dist = as.matrix(eucl.dist(x, y) / scale)
     return((std.dist < 1) * 2 / pi * (acos(-std.dist) - std.dist * sqrt(1 -
       std.dist ^ 2)))
-  }
-  if (kernel == 'exp') {
-    if (is.null(scale)) stop('Exponential kernel requires scale argument.')
-    return(exp(-as.matrix(stats::dist(x) / (n * scale ^ 2))))
-  }
-  if (kernel == 'gau') {
-    if (is.null(scale)) stop('Gaussian kernel requires scale argument.')
-    return(exp(-as.matrix(stats::dist(x) ^ 2 / (scale * n))))
   }
   if (kernel == 'pol') {
     if (is.null(const)) stop('Polynomial kernel requires const argument.')
     if (is.null(degree)) stop('Polynomial kernel requires degree argument.')
     if (is.null(scale)) stop('Polynomial kernel requires scale argument.')
-    return((const + scale * x %*% t(x)) ^ degree)
+    return((const + scale * y %*% t(x)) ^ degree)
   }
   if (kernel == 'imq') {
     if (is.null(const))
       stop('Inverse multiquadratic kernel requires const argument.')
-    return(sqrt(as.matrix(stats::dist(x) ^ 2 + const ^ 2)) ^ -1)
-  }
-  if (kernel == 'lap') {
-    if (is.null(scale)) stop('Laplacian kernel requires scale argument.')
-    return(exp(as.matrix(stats::dist(x, method='manhattan') / scale)))
+    return(sqrt(as.matrix(eucl.dist(x, y) ^ 2 + const ^ 2)) ^ -1)
   }
   if (kernel == 'log') {
     if (is.null(degree)) stop('Logarithmic kernel requires degree argument.')
-    return(-log(as.matrix(stats::dist(x) ^ degree) + 1))
+    return(-log(as.matrix(eucl.dist(x, y) ^ degree) + 1))
   }
   if (kernel == 'mqk') {
     if (is.null(const)) stop('Multiquadratic kernel requires const argument.')
-    return(sqrt(as.matrix(stats::dist(x) ^ 2 + const ^ 2)))
+    return(sqrt(as.matrix(eucl.dist(x, y) ^ 2 + const ^ 2)))
   }
   if (kernel == 'pow') {
     if (is.null(degree)) stop('Power kernel requires degree argument.')
-    return((x %*% t(x)) ^ degree)
+    return((y %*% t(x)) ^ degree)
   }
   if (kernel == 'rbf') {
     if (is.null(scale))
       stop('Radial basis function kernel requires scale argument.')
-    return(exp(-scale * as.matrix(stats::dist(x) ^ 2)))
+    return(exp(-scale * as.matrix(eucl.dist(x, y) ^ 2)))
   }
   if (kernel == 'rqk') {
     if (is.null(const))
       stop('Rational quadratic kernel requires const argument.')
-    quad.dist = as.matrix(stats::dist(x) ^ 2)
+    quad.dist = as.matrix(eucl.dist(x, y) ^ 2)
     return(1 - quad.dist / (quad.dist + const))
   }
   if (kernel == 'sig') {
     if (is.null(const)) stop('Sigmoid kernel requires const argument.')
     if (is.null(scale)) stop('Sigmoid kernel requires scale argument.')
-    return(tanh(const + scale * x %*% t(x)))
+    return(tanh(const + scale * y %*% t(x)))
   }
   if (kernel == 'sph') {
     if (is.null(scale)) stop('Spherical kernel requires scale argument.')
-    std.dist = as.matrix(stats::dist(x) / scale)
+    std.dist = as.matrix(eucl.dist(x, y) / scale)
     return((std.dist < 1) * (1 - 3 / 2 * std.dist + std.dist ^ 3 / 2))
   }
   # Default: linear kernel
   if (is.null(const)) stop('Linear kernel requires const argument.')
-  return(x %*% t(x) + const)
+  return(y %*% t(x) + const)
 }
 
 ################################################################################

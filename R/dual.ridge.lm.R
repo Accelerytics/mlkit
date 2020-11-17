@@ -36,6 +36,7 @@
 #' \item{alpha}{L1-weight hyperparameter in elastic net penalty term.}
 #' \item{lambda}{penalty term scaling hyperparameter.}
 #' \item{r2}{coefficient of determination for optimal coefficients.}
+#' \item{x}{matrix containing the explanatory variables used in estimation.}
 #' \item{ker.mat}{kernel matrix used in estimation.}
 #' \item{kernel}{kernel transformation.}
 #' \item{const}{constant parameter in the kernel transformation.}
@@ -81,7 +82,8 @@ dual.ridge.lm = function(formula, data, lambda, intercept=F, standardize=F,
 
   # Return mlfit object
   res = list('coefficients'=coefficients, 'alpha'=0, 'lambda'=lambda, 'r2'=r2,
-    'ker.mat'=k, 'kernel'=kernel, 'const'=const, 'degree'=degree, 'scale'=scale)
+    'x'=x, 'ker.mat'=k, 'kernel'=kernel, 'const'=const, 'degree'=degree,
+    'scale'=scale)
   class(res) = 'mlkit.dual.ridge.fit'
   return(res)
 }

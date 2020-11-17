@@ -59,6 +59,7 @@ is a list containing at least the following components:
 \item{alpha}{L1-weight hyperparameter in elastic net penalty term.}
 \item{lambda}{penalty term scaling hyperparameter.}
 \item{r2}{coefficient of determination for optimal coefficients.}
+\item{x}{matrix containing the explanatory variables used in estimation.}
 \item{ker.mat}{kernel matrix used in estimation.}
 \item{kernel}{kernel transformation.}
 \item{const}{constant parameter in the kernel transformation.}

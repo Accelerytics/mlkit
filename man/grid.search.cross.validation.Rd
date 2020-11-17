@@ -18,6 +18,7 @@ grid.search.cross.validation(
   plot = F,
   contour.scale = NULL,
   coef.lims = NULL,
+  coef.names = NULL,
   seed = NULL,
   ...
 )
@@ -74,6 +75,10 @@ their scales for the axes in the contour plots. Default is \code{NULL}.}
 
 \item{coef.lims}{optimal limits of the coefficients plot. Default is
 \code{NULL}.}
+
+\item{coef.names}{optional names of coefficients, used in estimates barplot.
+Default is \code{NULL} in which case the column names of the explanatory
+variables are used.}
 
 \item{seed}{optimal seed to specify. Default is \code{NULL}.}
 

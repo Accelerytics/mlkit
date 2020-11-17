@@ -20,6 +20,7 @@ Imports:
     latex2exp,
     utils,
     badger,
-    progress
+    progress,
+    MASS
 URL: https://github.com/Accelerytics/mlkit
 BugReports: https://github.com/Accelerytics/mlkit/issues
