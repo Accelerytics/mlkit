@@ -74,8 +74,9 @@ svm.bin = function(formula, data, lambda, loss='qua', huber.k=NULL,
       })
     }
   }
-  t.loss = function(q, v) sum(sapply(q[!POS.IND & (q > -1)] + 1, h.loss)) +
-    sum(sapply(1 - q[POS.IND & (q <= 1)], h.loss)) + lambda * sum(v[-1] ^ 2)
+  t.loss = function(q, v) sum(unlist(sapply(q[!POS.IND & (q > -1)] + 1,
+    h.loss))) + sum(unlist(sapply(1 - q[POS.IND & (q <= 1)], h.loss))) +
+    lambda * sum(v[-1] ^ 2)
   pline = function(i, o, n, d)
     list(c('Iteration', i), c('Loss.old', o), c('Loss.new', n), c('Delta', d))
 
