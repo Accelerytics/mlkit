@@ -52,27 +52,22 @@ svm.bin = function(formula, data, lambda, loss='qua', huber.k=NULL,
 
   # Define constants
   n = nrow(x); POS.IND = (y == 1L); p = diag(c(0, rep(1, ncol(x) - 1)))
+  z = solve(t(x) %*% x + lambda * p) %*% t(x)
 
   # Define helper functions for computing specific expressions and loss
-  h.loss = hinge.loss(x, loss, huber.k)
+  h.loss = hinge.loss(loss, huber.k)
   upt.a = function(q) svm.upt.a(q, POS.IND, loss, huber.k)
   upt.b = function(a, q) svm.upt.b(a, q, POS.IND, loss, huber.k)
 
   # Updates of v depend on type of loss; use simplest for quadratic hinge loss
-  if (loss == 'qua') {
-    z = solve(t(x) %*% x + lambda * p) %*% t(x)
-    update.v = function(a, x, lambda, b, v) return(z %*% b)
-  } else {
-    update.v = function(a, x, lambda, b, v) {
-      tryCatch ({
-        v.plus = solve(t(x) %*% a %*% x + lambda * p, t(x) %*% b)
-        v + 2 * (v.plus - v)
-      },
+  update.v = function(a, x, lambda, b, v) {
+    if (loss == 'qua') return(z %*% b)
+    return(tryCatch(solve(t(x) %*% a %*% x + lambda * p, t(x) %*% b),
       error = function(e) {
         warning("Terminating early due to A being computationally singular.")
         v
       })
-    }
+    )
   }
   t.loss = function(q, v) sum(unlist(sapply(q[!POS.IND & (q > -1)] + 1,
     h.loss))) + sum(unlist(sapply(1 - q[POS.IND & (q <= 1)], h.loss))) +
@@ -100,7 +95,7 @@ svm.bin = function(formula, data, lambda, loss='qua', huber.k=NULL,
   }
 
   # Ensure information of last iteration is displayed
-  if (verbose & (i %% verbose)) progress.str(pline(i, l.new, l.old, diff))
+  if (verbose & (i %% verbose)) progress.str(pline(i, l.old, l.new, diff))
 
   # Return mlfit.bin.fit object
   res = list('coefficients'=v.new, 'loss'=l.new, 'lambda'=lambda,
