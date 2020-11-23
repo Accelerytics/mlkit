@@ -81,7 +81,7 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
 
   # If verbose, initialize progress bar
   if (verbose) pb = progress::progress_bar$new(
-    format="[:bar] :current/:total (:percent)", total=n.combs * n.folds)
+    format="[:bar] :current/:total :percent eta: :eta", total=n.combs * n.folds)
 
   # Apply grid search
   for (i in 1:n.combs) {
