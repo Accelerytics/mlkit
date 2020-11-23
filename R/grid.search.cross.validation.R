@@ -86,6 +86,7 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
   # Apply grid search
   for (i in 1:n.combs) {
 
+    # Specify hyperparameter combination
     params = grid[i, ]
     for (j in 1:n.pars)
       if (typeof(params[[j]]) == 'list') params[[j]] = params[[j]][[1]]
@@ -104,7 +105,7 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
           c(fold.vars, params, list(...))), x[test.ids[fold, ], ]),
           y[test.ids[fold, ]]),
         error = function(e) {
-          warning(paste('Failed for', paste(names(params.list), '=', grid[i, ],
+          warning(paste('Failed for', paste(names(params.list), '=', params,
             collapse=', ')))
           if (force & grepl('.*(singular)|(infinite).*', e$message)) return(Inf)
           stop(e)
@@ -117,16 +118,19 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
   }
 
   # Extract optimal hyperparameters
-  opt.id = which.min(metric)
-  opt.metric = metric[opt.id]; opt.params = grid[opt.id, ]
+  opt.id = which.min(metric); opt.metric = metric[opt.id]
+  opt.pars = grid[opt.id, ]
+  for (j in 1:n.pars)
+    if (typeof(opt.pars[[j]]) == 'list')
+      opt.pars[[j]] = opt.pars[[j]][[1]]
 
   # Update grid to include all metrics
   grid$metric = metric
 
   # Estimate best beta
   if (use.formula) opt.beta = do.call(estimator, c(list(formula=formula,
-    data=data), as.list(opt.params), list(...)))$coefficients
-  else opt.beta = do.call(estimator, c(list(X=x, y=y), as.list(opt.params),
+    data=data), opt.pars, list(...)))$coefficients
+  else opt.beta = do.call(estimator, c(list(X=x, y=y), opt.pars,
     list(...)))$coefficients
 
   # Plot heatmaps and coefficients if required
@@ -167,7 +171,7 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
 
   # Return gscv object
   res = list('coefficients'=opt.beta, 'metric'=opt.metric,
-    'params'=c(opt.params), 'grid'=grid)
+    'params'=c(opt.pars), 'grid'=grid)
   class(res) = 'gscv'
   return(res)
 }
