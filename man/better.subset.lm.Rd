@@ -12,7 +12,7 @@ better.subset.lm(
   standardize = F,
   beta.init = NULL,
   beta.tol = 0,
-  loss.tol = 0.000001,
+  loss.tol = 1e-06,
   seed = NULL,
   verbose = 0
 )

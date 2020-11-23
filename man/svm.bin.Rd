@@ -10,7 +10,7 @@ svm.bin(
   lambda,
   loss = "qua",
   huber.k = NULL,
-  loss.tol = 0.000001,
+  loss.tol = 1e-06,
   v.init = NULL,
   seed = NULL,
   verbose = 0
