@@ -20,6 +20,7 @@ grid.search.cross.validation(
   coef.lims = NULL,
   coef.names = NULL,
   seed = NULL,
+  use.formula = T,
   ...
 )
 }
@@ -81,6 +82,9 @@ Default is \code{NULL} in which case the column names of the explanatory
 variables are used.}
 
 \item{seed}{optimal seed to specify. Default is \code{NULL}.}
+
+\item{use.formula}{whether or not to use the formula data combination of X
+and y as inputs to the model. Default is \code{TRUE}.}
 
 \item{...}{additional arguments to be passed to the \code{estimator}
 function.}

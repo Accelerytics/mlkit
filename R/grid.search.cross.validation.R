@@ -47,6 +47,8 @@
 #' Default is \code{NULL} in which case the column names of the explanatory
 #' variables are used.
 #' @param seed optimal seed to specify. Default is \code{NULL}.
+#' @param use.formula whether or not to use the formula data combination of X
+#' and y as inputs to the model. Default is \code{TRUE}.
 #' @param ... additional arguments to be passed to the \code{estimator}
 #' function.
 #'
@@ -60,11 +62,12 @@
 #'
 grid.search.cross.validation = function(formula, data, estimator, params.list,
   n.folds=5, ind.metric, comb.metric=mean, fold.id=NULL, force=F, verbose=F,
-  plot=F, contour.scale=NULL, coef.lims=NULL, coef.names=NULL, seed=NULL, ...) {
+  plot=F, contour.scale=NULL, coef.lims=NULL, coef.names=NULL, seed=NULL,
+  use.formula=T, ...) {
 
   # Define constants
   y = data.matrix(data[, all.vars(formula)[1]]); set.seed(seed)
-  x = stats::model.matrix(formula, data); N = nrow(x); opt.metric = Inf
+  x = stats::model.matrix(formula, data); N = nrow(x); opt.metric = Inf;
 
   # Specify fold ids if not given and initialize metrics and ids vector
   if(is.null(fold.id)) fold.id = ((1:N) %% n.folds + 1)[sample(N, N)]
@@ -73,23 +76,32 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
   for (fold in 1:n.folds) test.ids[fold, ] = (fold.id == fold)
 
   # Create grid for cross validation search
-  grid = expand.grid(params.list, stringsAsFactors=F)
-  n.combs = nrow(grid); metric = rep(NULL, n.combs)
+  grid = expand.grid(params.list, stringsAsFactors=F); n.combs = nrow(grid)
+  metric = rep(NULL, n.combs); list.pars=apply(grid, 2, is.list)
 
   # If verbose, initialize progress bar
-  if (verbose) pb = progress::progress_bar$new(total = n.combs * n.folds)
+  if (verbose) pb = progress::progress_bar$new(
+    format="[:bar] :current/:total (:percent)", total=n.combs * n.folds)
 
   # Apply grid search
   for (i in 1:n.combs) {
 
+    # Retrieve parameter combination
+    list.params = c(as.list(grid[i, !list.pars]), grid[i, list.pars])
+
     # Apply cross validation and if verbose, update progress bar
     for (fold in 1:n.folds) { if (verbose) pb$tick()
 
+      #
+      if (use.formula)
+        fold.vars = list(list(formula=formula, data=data[!test.ids[fold, ], ]))
+      else
+        fold.vars = list(X=x[!test.ids[fold, ], ], y=y[!test.ids[fold, ]])
+
       # Compute individual metric on fold
-      metrics[fold] = tryCatch(
-        ind.metric(stats::predict(do.call(estimator, c(list(formula=formula,
-          data=data[!test.ids[fold, ], ]), as.list(grid[i, ]), list(...))),
-          newdata=x[test.ids[fold, ], ]), y[test.ids[fold, ]]),
+      metrics[fold] = tryCatch(ind.metric(stats::predict(do.call(estimator,
+          c(fold.vars, list.params, list(...))), x[test.ids[fold, ], ]),
+          y[test.ids[fold, ]]),
         error = function(e) {
           warning(paste('Failed for', paste(names(params.list), '=', grid[i, ],
             collapse=', ')))
@@ -107,13 +119,17 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
   opt.id = which.min(metric)
   opt.metric = metric[opt.id]; opt.params = grid[opt.id, ]
 
+  # Update grid to include all metrics
+  grid$metric = metric
+
   # Estimate best beta
-  opt.beta = do.call(estimator, c(list(formula=formula, data=data),
-    as.list(opt.params), list(...)))$coefficients
+  if (use.formula) opt.beta = do.call(estimator, c(list(formula=formula,
+    data=data), as.list(opt.params), list(...)))$coefficients
+  else opt.beta = do.call(estimator, c(list(X=x, y=y), as.list(opt.params),
+    list(...)))$coefficients
 
   # Plot heatmaps and coefficients if required
   if (plot) {
-    grid$metric = metric
 
     # Contour plots if more than 1 hyperparameter
     if (length(params.list) > 1) {
@@ -150,7 +166,7 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
 
   # Return gscv object
   res = list('coefficients'=opt.beta, 'metric'=opt.metric,
-    'params'=c(opt.params))
+    'params'=c(opt.params), 'grid'=grid)
   class(res) = 'gscv'
   return(res)
 }
