@@ -77,7 +77,7 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
 
   # Create grid for cross validation search
   grid = expand.grid(params.list, stringsAsFactors=F); n.combs = nrow(grid)
-  metric = rep(NULL, n.combs); list.pars=apply(grid, 2, is.list)
+  metric = rep(NULL, n.combs); n.pars = length(params.list)
 
   # If verbose, initialize progress bar
   if (verbose) pb = progress::progress_bar$new(
@@ -86,21 +86,22 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
   # Apply grid search
   for (i in 1:n.combs) {
 
-    # Retrieve parameter combination
-    list.params = c(as.list(grid[i, !list.pars]), grid[i, list.pars])
+    params = grid[i, ]
+    for (j in 1:n.pars)
+      if (typeof(params[[j]]) == 'list') params[[j]] = params[[j]][[1]]
 
     # Apply cross validation and if verbose, update progress bar
     for (fold in 1:n.folds) { if (verbose) pb$tick()
 
-      #
+      # Specify dependent and explanatory variables for fold
       if (use.formula)
-        fold.vars = list(list(formula=formula, data=data[!test.ids[fold, ], ]))
+        fold.vars = list(formula=formula, data=data[!test.ids[fold, ], ])
       else
         fold.vars = list(X=x[!test.ids[fold, ], ], y=y[!test.ids[fold, ]])
 
       # Compute individual metric on fold
       metrics[fold] = tryCatch(ind.metric(stats::predict(do.call(estimator,
-          c(fold.vars, list.params, list(...))), x[test.ids[fold, ], ]),
+          c(fold.vars, params, list(...))), x[test.ids[fold, ], ]),
           y[test.ids[fold, ]]),
         error = function(e) {
           warning(paste('Failed for', paste(names(params.list), '=', grid[i, ],
