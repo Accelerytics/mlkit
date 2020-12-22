@@ -109,7 +109,8 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
           error = function(e) {
             if (grepl(".*'data' must be a data.frame.*", e$message))
               return(ind.metric(stats::predict(do.call(estimator,
-                c(fold.vars, params, list(...))), data[test.ids[fold, ], ])))
+                c(fold.vars, params, list(...))), data[test.ids[fold, ], ]),
+                y[test.ids[fold, ]]))
             stop(e)
           }
         ),
