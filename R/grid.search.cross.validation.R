@@ -101,9 +101,18 @@ grid.search.cross.validation = function(formula, data, estimator, params.list,
         fold.vars = list(X=x[!test.ids[fold, ], ], y=y[!test.ids[fold, ]])
 
       # Compute individual metric on fold
-      metrics[fold] = tryCatch(ind.metric(stats::predict(do.call(estimator,
-          c(fold.vars, params, list(...))), x[test.ids[fold, ], ]),
-          y[test.ids[fold, ]]),
+      metrics[fold] = tryCatch(
+        tryCatch(
+          ind.metric(stats::predict(do.call(estimator,
+            c(fold.vars, params, list(...))), x[test.ids[fold, ], ]),
+            y[test.ids[fold, ]]),
+          error = function(e) {
+            if (grepl(".*'data' must be a data.frame".*, e$message))
+              return(ind.metric(stats::predict(do.call(estimator,
+                c(fold.vars, params, list(...))), data[test.ids[fold, ], ])))
+            stop(e)
+          }
+        ),
         error = function(e) {
           warning(paste('Failed for', paste(names(params.list), '=', params,
             collapse=', ')))
