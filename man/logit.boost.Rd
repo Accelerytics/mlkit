@@ -2,7 +2,7 @@
 % Please edit documentation in R/logit.boost.R
 \name{logit.boost}
 \alias{logit.boost}
-\title{Implementation of the Multiclass LogitBoost Algorithm}
+\title{Implementation of the Binary LogitBoost Algorithm}
 \usage{
 logit.boost(formula, data, n.iter)
 }
