@@ -26,7 +26,7 @@ logit.boost = function(formula, data, n.iter) {
 
   # Extract dependent variable and explanatory variables
   dep.var = all.vars(formula)[1]
-  y = as.character(data[ , dep.var])
+  y = as.factor(df$train[[dep.var]])
   y.star = stats::model.matrix(~ 0 + ., as.data.frame(y))
   x = cbind(1, stats::model.matrix(formula, data))
 
